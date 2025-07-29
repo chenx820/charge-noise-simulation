@@ -43,6 +43,7 @@ def generate_charge_noise():
     
     # 1. White noise (Gaussian noise)
     white_noise = np.random.normal(0, 0.1, n_samples)
+    print(f"White noise: {white_noise}")
     
     # 2. 1/f noise (pink noise)
     # Generate 1/f noise by filtering white noise
@@ -147,7 +148,7 @@ def plot_spectrum(freq_positive, psd_positive):
     
     # Linear scale spectrum
     axes[0, 0].semilogy(freq_positive, psd_positive, 'b-', linewidth=0.8)
-    axes[0, 0].set_xlabel('Frequency (Hz)')
+    axes[0, 0].set_xlabel('Frequency [Hz]')
     axes[0, 0].set_ylabel('Power Spectral Density')
     axes[0, 0].set_title('Power Spectral Density (Log Scale)')
     axes[0, 0].grid(True, alpha=0.3)
@@ -155,7 +156,7 @@ def plot_spectrum(freq_positive, psd_positive):
     
     # Log-log scale spectrum
     axes[0, 1].loglog(freq_positive, psd_positive, 'r-', linewidth=0.8)
-    axes[0, 1].set_xlabel('Frequency (Hz)')
+    axes[0, 1].set_xlabel('Frequency [Hz]')
     axes[0, 1].set_ylabel('Power Spectral Density')
     axes[0, 1].set_title('Power Spectral Density (Log-Log Scale)')
     axes[0, 1].grid(True, alpha=0.3)
@@ -189,7 +190,7 @@ def plot_spectrum(freq_positive, psd_positive):
         print(f"  Theoretical 1/f slope: -1.0")
         print(f"  Fit quality: {abs(slope + 1):.3f} (closer to 0 is better)")
     
-    axes[1, 0].set_xlabel('Frequency (Hz)')
+    axes[1, 0].set_xlabel('Frequency [Hz]')
     axes[1, 0].set_ylabel('Power Spectral Density')
     axes[1, 0].set_title('Low Frequency Region 1/f Noise Analysis')
     axes[1, 0].legend()
@@ -286,12 +287,6 @@ def main():
     detailed_analysis(freq_positive, psd_positive, base_signal)
     
     print("\nSimulation completed!")
-    print("=" * 50)
-    print("Conclusions:")
-    print("1. Successfully generated charge noise signal with multiple noise components")
-    print("2. Observed spectral characteristics through Fourier transform")
-    print("3. Indeed observed 1/f noise characteristics in low frequency regions")
-    print("4. Quantified 1/f noise intensity and quality through fitting analysis")
 
 if __name__ == "__main__":
     main() 
