@@ -43,7 +43,6 @@ def generate_charge_noise():
     
     # 1. White noise (Gaussian noise)
     white_noise = np.random.normal(0, 0.1, n_samples)
-    print(f"White noise: {white_noise}")
     
     # 2. 1/f noise (pink noise)
     # Generate 1/f noise by filtering white noise
