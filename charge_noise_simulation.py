@@ -117,17 +117,32 @@ def analyze_spectrum_fft(signal_with_noise, dt):
     return freq_positive, psd_positive
 
 def plot_spectrum(freq_positive, psd_positive, method):
-    """Plot spectrum graphs"""
+    """Plot spectrum graphs with 1/f reference"""
     
     # Plot spectrum
     fig, axes = plt.subplots(1, 2, figsize=(12, 5))
     
-    # Log-log scale spectrum
-    axes[0].loglog(freq_positive, psd_positive, 'r-', linewidth=0.8)
+    # Log-log scale spectrum with 1/f reference
+    axes[0].loglog(freq_positive, psd_positive, 'r-', linewidth=0.8, label='Measured Data')
+    
+    # Add 1/f reference line
+    # Find the middle frequency range for scaling
+    mid_idx = len(freq_positive) // 2
+    mid_freq = freq_positive[mid_idx]
+    mid_psd = psd_positive[mid_idx]
+    
+    # Generate 1/f reference line (avoid f=0)
+    min_freq = max(freq_positive[0], 0.1)  # Avoid f=0
+    ref_freq = np.logspace(np.log10(min_freq), np.log10(freq_positive[-1]), 100)
+    ref_psd = mid_psd * (mid_freq / ref_freq)  # Scale to match at mid frequency
+    
+    axes[0].loglog(ref_freq, ref_psd, 'b--', linewidth=2, label='1/f Reference')
     axes[0].set_xlabel('Frequency [Hz]')
     axes[0].set_ylabel('Power Spectral Density')
-    axes[0].set_title(f'Power Spectral Density ({method})')
+    axes[0].set_title(f'Power Spectral Density ({method}) with 1/f Reference')
+    axes[0].legend()
     axes[0].grid(True, alpha=0.3)
+    axes[0].set_xlim(1, freq_positive[-1]) # 1 Hz to 10 kHz
     
     # Spectral density distribution
     axes[1].hist(np.log10(psd_positive), bins=50, alpha=0.7, color='orange', edgecolor='black')
@@ -138,31 +153,6 @@ def plot_spectrum(freq_positive, psd_positive, method):
     
     plt.tight_layout()
     plt.savefig(f'spectrum_analysis_{method}.png', dpi=300, bbox_inches='tight')
-
-def analyze_1f_noise(frequencies, psd, freq_range=(0.1, 100)):
-    """Analyze 1/f noise characteristics"""
-    mask = (frequencies >= freq_range[0]) & (frequencies <= freq_range[1])
-    freq_analysis = frequencies[mask]
-    psd_analysis = psd[mask]
-    
-    if len(freq_analysis) < 10:
-        return None, None, None
-    
-    # Log fitting
-    log_freq = np.log(freq_analysis)
-    log_psd = np.log(psd_analysis)
-    
-    coeffs = np.polyfit(log_freq, log_psd, 1)
-    slope = coeffs[0]
-    intercept = coeffs[1]
-    
-    # Calculate R²
-    fit_values = intercept + slope * log_freq
-    ss_res = np.sum((log_psd - fit_values) ** 2)
-    ss_tot = np.sum((log_psd - np.mean(log_psd)) ** 2)
-    r_squared = 1 - (ss_res / ss_tot)
-    
-    return slope, r_squared, freq_analysis
 
 # Generate charge noise
 t, signal_with_noise, white_noise, pink_noise, base_signal = generate_charge_noise()
