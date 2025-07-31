@@ -12,9 +12,10 @@ import matplotlib.pyplot as plt
 from scipy import signal
 from scipy.fft import fft, fftfreq
 from scipy.signal import welch
+import pandas as pd
 
 # Set random seed for reproducible results
-np.random.seed(42)
+# np.random.seed(42)
 
 def generate_charge_noise():
     """Generate charge noise time series"""
@@ -33,12 +34,12 @@ def generate_charge_noise():
     print(f"Sampling frequency: {1/dt:.0f} Hz")
     
     # Generate base signal (can be DC bias)
-    base_signal = 1.0  # Base bias
+    base_signal = 3e-10  # Base bias
     
     # Generate different types of noise
     
     # 1. White noise (Gaussian noise)
-    white_noise = np.random.normal(0, 0.1, n_samples)
+    white_noise = np.random.normal(0, 2e-10, n_samples)
     
     # 2. 1/f noise (pink noise)
     # Generate 1/f noise by filtering white noise
@@ -51,7 +52,7 @@ def generate_charge_noise():
     pink_noise_fft[positive_freq_mask] /= np.sqrt(frequencies[positive_freq_mask])  # A(f) = 1/sqrt(f)
     pink_noise_fft[~positive_freq_mask] = 0  # Handle negative frequencies
     pink_noise = np.real(np.fft.ifft(pink_noise_fft))
-    
+    # generate directly 
     # 3. Random walk noise (Brownian noise)
     brown_noise = np.cumsum(white_noise) * 0.01
     
@@ -59,12 +60,12 @@ def generate_charge_noise():
     periodic_noise = 0.05 * np.sin(2 * np.pi * 50 * t) + 0.03 * np.sin(2 * np.pi * 120 * t)
     
     # Combine all noise components
-    # total_noise = white_noise + 0.5 * pink_noise + 0.3 * brown_noise + periodic_noise
+    # total_noise = 0.1 * white_noise + 0.5 * pink_noise + 0.3 * brown_noise 
     total_noise = pink_noise
     
     # Final signal
     signal_with_noise = base_signal + total_noise
-    
+
     return t, signal_with_noise, white_noise, pink_noise, base_signal
 
 def plot_time_series(t, signal_with_noise, white_noise, pink_noise):
@@ -124,25 +125,12 @@ def plot_spectrum(freq_positive, psd_positive, method):
     
     # Log-log scale spectrum with 1/f reference
     axes[0].loglog(freq_positive, psd_positive, 'r-', linewidth=0.8, label='Measured Data')
-    
-    # Add 1/f reference line
-    # Find the middle frequency range for scaling
-    mid_idx = len(freq_positive) // 2
-    mid_freq = freq_positive[mid_idx]
-    mid_psd = psd_positive[mid_idx]
-    
-    # Generate 1/f reference line (avoid f=0)
-    min_freq = max(freq_positive[0], 0.1)  # Avoid f=0
-    ref_freq = np.logspace(np.log10(min_freq), np.log10(freq_positive[-1]), 100)
-    ref_psd = mid_psd * (mid_freq / ref_freq)  # Scale to match at mid frequency
-    
-    axes[0].loglog(ref_freq, ref_psd, 'b--', linewidth=2, label='1/f Reference')
+
     axes[0].set_xlabel('Frequency [Hz]')
     axes[0].set_ylabel('Power Spectral Density')
     axes[0].set_title(f'Power Spectral Density ({method}) with 1/f Reference')
     axes[0].legend()
     axes[0].grid(True, alpha=0.3)
-    axes[0].set_xlim(1, freq_positive[-1]) # 1 Hz to 10 kHz
     
     # Spectral density distribution
     axes[1].hist(np.log10(psd_positive), bins=50, alpha=0.7, color='orange', edgecolor='black')
@@ -161,9 +149,9 @@ t, signal_with_noise, white_noise, pink_noise, base_signal = generate_charge_noi
 plot_time_series(t, signal_with_noise, white_noise, pink_noise)
     
 # Spectral analysis (Welch)
-freq_welch, psd_welch = analyze_spectrum_welch(signal_with_noise, 0.05e-3)
+freq_welch, psd_welch = analyze_spectrum_welch(signal_with_noise, 50e-3)
 plot_spectrum(freq_welch, psd_welch, "Welch")
 
 # Spectral analysis (FFT)
-freq_positive, psd_positive = analyze_spectrum_fft(signal_with_noise, 0.05e-3)
+freq_positive, psd_positive = analyze_spectrum_fft(signal_with_noise, 50e-3)
 plot_spectrum(freq_positive, psd_positive, "FFT")
