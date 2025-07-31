@@ -11,12 +11,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy import signal
 from scipy.fft import fft, fftfreq
-import seaborn as sns
 from scipy.signal import welch
-
-# Set font for better display
-#plt.rcParams['font.sans-serif'] = ['Arial', 'DejaVu Sans']
-#plt.rcParams['axes.unicode_minus'] = False
 
 # Set random seed for reproducible results
 np.random.seed(42)
@@ -79,6 +74,7 @@ def plot_time_series(t, signal_with_noise, white_noise, pink_noise):
     fig, axes = plt.subplots(1, 2, figsize=(12, 5))
     
     # Complete time series
+    axes[0].set_xlim(min(t), max(t))
     axes[0].plot(t, signal_with_noise, 'b-', alpha=0.7, linewidth=0.5)
     axes[0].set_xlabel('Time [s]')
     axes[0].set_ylabel('Signal Amplitude')
@@ -94,7 +90,6 @@ def plot_time_series(t, signal_with_noise, white_noise, pink_noise):
     
     plt.tight_layout()
     plt.savefig('time_series_analysis.png', dpi=300, bbox_inches='tight')
-    plt.show()
 
 def analyze_spectrum_welch(signal_with_noise, dt):
     """Analyze spectral characteristics using Welch method"""
@@ -131,7 +126,7 @@ def plot_spectrum(freq_positive, psd_positive, method):
     axes[0].loglog(freq_positive, psd_positive, 'r-', linewidth=0.8)
     axes[0].set_xlabel('Frequency [Hz]')
     axes[0].set_ylabel('Power Spectral Density')
-    axes[0].set_title('Power Spectral Density (Log-Log Scale)')
+    axes[0].set_title(f'Power Spectral Density ({method})')
     axes[0].grid(True, alpha=0.3)
     
     # Spectral density distribution
@@ -142,9 +137,7 @@ def plot_spectrum(freq_positive, psd_positive, method):
     axes[1].grid(True, alpha=0.3)
     
     plt.tight_layout()
-    plt.title(f'Spectrum Analysis ({method})')
     plt.savefig(f'spectrum_analysis_{method}.png', dpi=300, bbox_inches='tight')
-    plt.show()
 
 def analyze_1f_noise(frequencies, psd, freq_range=(0.1, 100)):
     """Analyze 1/f noise characteristics"""
