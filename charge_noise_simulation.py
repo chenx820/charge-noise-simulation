@@ -13,16 +13,15 @@ from scipy import signal
 from scipy.fft import fft, fftfreq
 from scipy.signal import welch
 import pandas as pd
+import colorednoise as cn
 
 # Set random seed for reproducible results
 # np.random.seed(42)
 
-def generate_charge_noise():
+def generate_charge_noise(n_samples, dt, method='white'):
     """Generate charge noise time series"""
     
     # Parameter settings
-    n_samples = 20000
-    dt = 50e-3  # 50 milliseconds
     total_time = n_samples * dt
     
     # Generate time axis
@@ -35,24 +34,31 @@ def generate_charge_noise():
     
     # Generate base signal (can be DC bias)
     base_signal = 3e-10  # Base bias
+    fluctuation_amplitude = 2e-10
     
     # Generate different types of noise
     
     # 1. White noise (Gaussian noise)
-    white_noise = np.random.normal(0, 2e-10, n_samples)
+    white_noise = np.random.normal(0, fluctuation_amplitude, n_samples)
     
     # 2. 1/f noise (pink noise)
     # Generate 1/f noise by filtering white noise
     frequencies = fftfreq(n_samples, dt)
     positive_freq_mask = frequencies > 0
     
-    # Generate 1/f noise
-    white_noise_fft = fft(white_noise)
-    pink_noise_fft = white_noise_fft.copy()
-    pink_noise_fft[positive_freq_mask] /= np.sqrt(frequencies[positive_freq_mask])  # A(f) = 1/sqrt(f)
-    pink_noise_fft[~positive_freq_mask] = 0  # Handle negative frequencies
-    pink_noise = np.real(np.fft.ifft(pink_noise_fft))
-    # generate directly 
+    if method == 'white':
+        # Generate 1/f noise
+        white_noise_fft = fft(white_noise)
+        pink_noise_fft = white_noise_fft.copy()
+        pink_noise_fft[positive_freq_mask] /= np.sqrt(frequencies[positive_freq_mask])  # A(f) = 1/sqrt(f)
+        pink_noise_fft[~positive_freq_mask] = 0  # Handle negative frequencies
+        pink_noise = np.real(np.fft.ifft(pink_noise_fft))
+    elif method == 'pink':
+        # generate directly 
+        pink_noise = fluctuation_amplitude * cn.powerlaw_psd_gaussian(1, n_samples)
+    else:
+        raise ValueError(f"Invalid method: {method}")
+
     # 3. Random walk noise (Brownian noise)
     brown_noise = np.cumsum(white_noise) * 0.01
     
@@ -142,16 +148,19 @@ def plot_spectrum(freq_positive, psd_positive, method):
     plt.tight_layout()
     plt.savefig(f'spectrum_analysis_{method}.png', dpi=300, bbox_inches='tight')
 
+n_samples = 20000
+dt = 50e-3  # 50 milliseconds
+
 # Generate charge noise
-t, signal_with_noise, white_noise, pink_noise, base_signal = generate_charge_noise()
+t, signal_with_noise, white_noise, pink_noise, base_signal = generate_charge_noise(n_samples, dt, method='pink')
     
 # Plot time series
 plot_time_series(t, signal_with_noise, white_noise, pink_noise)
     
 # Spectral analysis (Welch)
-freq_welch, psd_welch = analyze_spectrum_welch(signal_with_noise, 50e-3)
+freq_welch, psd_welch = analyze_spectrum_welch(signal_with_noise, dt)
 plot_spectrum(freq_welch, psd_welch, "Welch")
 
 # Spectral analysis (FFT)
-freq_positive, psd_positive = analyze_spectrum_fft(signal_with_noise, 50e-3)
+freq_positive, psd_positive = analyze_spectrum_fft(signal_with_noise, dt)
 plot_spectrum(freq_positive, psd_positive, "FFT")
