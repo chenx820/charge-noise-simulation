@@ -18,7 +18,7 @@ import colorednoise as cn
 # Set random seed for reproducible results
 # np.random.seed(42)
 
-def generate_charge_noise(n_samples, dt, method='white'):
+def generate_charge_noise(n_samples, dt, method='white', base_signal=3e-10, fluctuation_amplitude=2e-10):
     """Generate charge noise time series"""
     
     # Parameter settings
@@ -31,12 +31,6 @@ def generate_charge_noise(n_samples, dt, method='white'):
     print(f"Sampling interval: {dt*1000:.2f} milliseconds")
     print(f"Total time: {total_time:.3f} seconds")
     print(f"Sampling frequency: {1/dt:.0f} Hz")
-    
-    # Generate base signal (can be DC bias)
-    base_signal = 3e-10  # Base bias
-    fluctuation_amplitude = 2e-10
-    
-    # Generate different types of noise
     
     # 1. White noise (Gaussian noise)
     white_noise = np.random.normal(0, fluctuation_amplitude, n_samples)
@@ -152,7 +146,11 @@ n_samples = 20000
 dt = 50e-3  # 50 milliseconds
 
 # Generate charge noise
-t, signal_with_noise, white_noise, pink_noise, base_signal = generate_charge_noise(n_samples, dt, method='pink')
+base_signal = 3e-10
+fluctuation_amplitude = 1e-10
+
+# Generate charge noise
+t, signal_with_noise, white_noise, pink_noise, base_signal = generate_charge_noise(n_samples, dt, method='pink', base_signal=base_signal, fluctuation_amplitude=fluctuation_amplitude)
     
 # Plot time series
 plot_time_series(t, signal_with_noise, white_noise, pink_noise)
