@@ -14,6 +14,7 @@ from scipy.fft import fft, fftfreq
 from scipy.signal import welch
 import pandas as pd
 import colorednoise as cn
+import os
 
 # Set random seed for reproducible results
 # np.random.seed(42)
@@ -72,7 +73,7 @@ def plot_time_series(t, signal_with_noise, white_noise, pink_noise):
     """Plot time series graphs"""
     
     # Plot time series
-    fig, axes = plt.subplots(1, 2, figsize=(12, 5))
+    fig, axes = plt.subplots(1, 2, figsize=(14, 5))
     
     # Complete time series
     axes[0].set_xlim(min(t), max(t))
@@ -90,7 +91,8 @@ def plot_time_series(t, signal_with_noise, white_noise, pink_noise):
     axes[1].grid(True, alpha=0.3)
     
     plt.tight_layout()
-    plt.savefig('time_series_analysis.png', dpi=300, bbox_inches='tight')
+    dir_path = os.path.dirname(os.path.abspath(__file__))
+    plt.savefig(os.path.join(dir_path, 'figures', 'time_series_analysis.png'), dpi=300, bbox_inches='tight')
 
 def analyze_spectrum_welch(signal_with_noise, dt):
     """Analyze spectral characteristics using Welch method"""
@@ -121,7 +123,7 @@ def plot_spectrum(freq_positive, psd_positive, method):
     """Plot spectrum graphs with 1/f reference"""
     
     # Plot spectrum
-    fig, axes = plt.subplots(1, 2, figsize=(12, 5))
+    fig, axes = plt.subplots(1, 2, figsize=(14, 5))
     
     # Log-log scale spectrum with 1/f reference
     axes[0].loglog(freq_positive, psd_positive, 'r-', linewidth=0.8, label='Measured Data')
@@ -140,7 +142,8 @@ def plot_spectrum(freq_positive, psd_positive, method):
     axes[1].grid(True, alpha=0.3)
     
     plt.tight_layout()
-    plt.savefig(f'spectrum_analysis_{method}.png', dpi=300, bbox_inches='tight')
+    dir_path = os.path.dirname(os.path.abspath(__file__))
+    plt.savefig(os.path.join(dir_path, 'figures', f'spectrum_analysis_{method}.png'), dpi=300, bbox_inches='tight')
 
 n_samples = 20000
 dt = 50e-3  # 50 milliseconds
