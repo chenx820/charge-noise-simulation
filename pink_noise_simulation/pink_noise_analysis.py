@@ -140,14 +140,13 @@ def plot_spectrum_analysis(frequencies, psds, alphas, method="Welch"):
         color = colors[i % len(colors)]
         axes[1].loglog(freq, np.sqrt(psd), color=color, alpha=0.7, 
                           linewidth=1.2, label=f'α = {alpha}')
-    
 
     for x in [0.1, 1, 10]:
         axes[1].axvline(x=x, color='gray', linestyle='--', linewidth=1.2, alpha=0.5)
 
     axes[1].set_xlabel('Frequency [Hz]')
-    axes[1].set_ylabel(r'√PSD [a.u./√Hz]')
-    axes[1].set_title('√PSD vs Frequency')
+    axes[1].set_ylabel(r'ASP [a.u./√Hz]')
+    axes[1].set_title('Amplitude Spectral Power vs Frequency')
     axes[1].legend()
     axes[1].grid(True, alpha=0.3)
     
