@@ -6,12 +6,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 
-np.random.seed(42)
+#np.random.seed(42)
 
 def generate_lorentzian_psd(
     W, L, tox, Nt, delta_E,
     num_devices=1,
-    f_min=1.0, f_max=1e6, points_per_decade=10):
+    f_min=1e-2, f_max=1e5, points_per_decade=10):
     """
     Generate Lorentzian noise power spectral density (PSD) for one or multiple devices
     based on the paper methodology.
@@ -33,7 +33,7 @@ def generate_lorentzian_psd(
     """
     # Physical constants
     q = 1.602e-19  # Elementary charge (C)
-    Cox_per_area = 3.9 * 8.854e-12 / tox # Oxide capacitance per unit area (F/m^2)
+    Cox_per_area = 0.01 # Oxide capacitance per unit area (F/m^2) 
 
     # --- Step 1: Determine trap count ---
     # Calculate average trap number <N_T>, reference paper
@@ -113,7 +113,7 @@ delta_E_val = 0.1 # (eV) - Effective energy range near Fermi level
 
 # --- Run simulation ---
 # Mimic Figure 1 in the paper, simulate noise variation across multiple devices (dies)
-num_sim_devices = 200 
+num_sim_devices = 10 
 frequencies, psd_list = generate_lorentzian_psd(
         W=W_eff, L=L_eff, tox=tox_eq, Nt=Nt_val, delta_E=delta_E_val,
         num_devices=num_sim_devices
